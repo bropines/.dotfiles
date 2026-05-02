@@ -5,8 +5,31 @@
 
 set -e
 
-DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
+# --- Self-Bootstrap Logic ---
+# If script is run directly (e.g. via curl), clone the full repo first.
+TARGET_DIR="$HOME/.dotfiles"
+REPO_URL="https://github.com/bropines/.dotfiles.git"
+
+if [ "$(basename "$0")" == "bash" ] || [ ! -f "$TARGET_DIR/install.sh" ]; then
+    echo "🚀 Bootstrapping Dotfiles from $REPO_URL..."
+    
+    # Ensure git is present for cloning
+    if ! command -v git &> /dev/null; then
+        sudo apt-get update && sudo apt-get install -y git
+    fi
+
+    if [ ! -d "$TARGET_DIR" ]; then
+        git clone "$REPO_URL" "$TARGET_DIR"
+    else
+        echo "📂 Target directory already exists, skipping clone."
+    fi
+    
+    # Execute the installer from the cloned directory
+    exec "$TARGET_DIR/install.sh" "$@"
+fi
+
+DOTFILES_DIR="$TARGET_DIR"
+ZSH_CUSTOM="${ZSH_CUSTOM:-$DOTFILES_DIR/zsh/.oh-my-zsh/custom}"
 
 HEAVY_MODE=false
 # Parse flags
