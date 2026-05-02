@@ -1,0 +1,11 @@
+# Ignore local overrides
+.zshrc.local
+
+# Ignore zsh cache and history (just in case)
+.zcompdump*
+.zhistory
+*.zwc
+zsh/.oh-my-zsh/
+zsh/.zcompdump*
+zsh/*.zwc
+zsh/.zhistory
