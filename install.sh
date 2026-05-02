@@ -46,11 +46,16 @@ DOTFILES_DIR="$TARGET_DIR"
 ZSH_CUSTOM="${ZSH_CUSTOM:-$DOTFILES_DIR/zsh/.oh-my-zsh/custom}"
 
 HEAVY_MODE=false
+ANDROID_MODE=false
 # Parse flags
 for arg in "$@"; do
     case $arg in
         --heavy|-h)
         HEAVY_MODE=true
+        shift
+        ;;
+        --android|-a)
+        ANDROID_MODE=true
         shift
         ;;
     esac
@@ -110,6 +115,47 @@ fi
 if [ ! -d "$HOME/.pyenv" ]; then
     echo "🐍 Installing Pyenv..."
     curl https://pyenv.run | bash
+fi
+
+# Android SDK (Optional)
+if [ "$ANDROID_MODE" = true ]; then
+    echo "🤖 Installing Android SDK Command-line tools..."
+    # Dependencies: Java is required for Android tools
+    if ! command -v java &> /dev/null; then
+        echo "⚠️ Java not found. Installing Java..."
+        if command -v apt-get &> /dev/null; then
+            install_packages default-jdk
+        elif command -v pacman &> /dev/null; then
+            install_packages jdk-openjdk
+        elif command -v dnf &> /dev/null; then
+            install_packages java-latest-openjdk-devel
+        fi
+    fi
+    
+    ANDROID_HOME="/opt/android-sdk"
+    if [ ! -d "$ANDROID_HOME" ]; then
+        sudo mkdir -p "$ANDROID_HOME"
+        echo "⬇️ Downloading Android Command-line tools..."
+        curl -LO "https://dl.google.com/android/repository/commandlinetools-linux-14742923_latest.zip"
+        sudo unzip -q "commandlinetools-linux-14742923_latest.zip" -d "$ANDROID_HOME"
+        rm "commandlinetools-linux-14742923_latest.zip"
+        
+        # Google's special requirement: Move contents into cmdline-tools/latest/
+        sudo mkdir -p "$ANDROID_HOME/cmdline-tools/latest"
+        # We need to move everything from the extracted 'cmdline-tools' folder into 'cmdline-tools/latest'
+        # To avoid moving the 'latest' folder into itself, we move files one by one or via temp
+        sudo mv "$ANDROID_HOME/cmdline-tools/bin" "$ANDROID_HOME/cmdline-tools/latest/"
+        sudo mv "$ANDROID_HOME/cmdline-tools/lib" "$ANDROID_HOME/cmdline-tools/latest/"
+        sudo mv "$ANDROID_HOME/cmdline-tools/source.properties" "$ANDROID_HOME/cmdline-tools/latest/"
+        sudo mv "$ANDROID_HOME/cmdline-tools/NOTICE.txt" "$ANDROID_HOME/cmdline-tools/latest/"
+        
+        # Ensure current user has permissions
+        sudo chown -R "$USER:$USER" "$ANDROID_HOME"
+        echo "✅ Android SDK tools installed to $ANDROID_HOME"
+        echo "📝 Don't forget to accept licenses later: sdkmanager --licenses"
+    else
+        echo "📂 Android SDK directory already exists, skipping download."
+    fi
 fi
 
 # 6. Heavy Mode Tools (Optional)

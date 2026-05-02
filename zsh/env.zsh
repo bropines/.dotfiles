@@ -52,7 +52,11 @@ if [ -d "$BUN_INSTALL" ]; then
 fi
 
 # Android SDK
-path_add "/opt/android-sdk-tools"
+export ANDROID_HOME="/opt/android-sdk"
+path_add "$ANDROID_HOME/cmdline-tools/latest/bin"
+path_add "$ANDROID_HOME/platform-tools"
+path_add "$ANDROID_HOME/emulator"
+path_add "$ANDROID_HOME/tools/bin"
 
 # Local bin
 path_add "$HOME/.local/bin"

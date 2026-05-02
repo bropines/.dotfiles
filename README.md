@@ -29,6 +29,12 @@ Installs `pyenv`, `sdkman` and enables their loading:
 ./install.sh --heavy
 ```
 
+### Android Development
+Installs Android SDK Command-line tools and Java:
+```bash
+./install.sh --android
+```
+
 ## Structure
 - `zsh/` - ZDOTDIR content
   - `env.zsh` - PATH and exports
