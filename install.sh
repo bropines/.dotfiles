@@ -5,6 +5,20 @@
 
 set -e
 
+# --- OS Detection & Package Manager Helper ---
+install_packages() {
+    if command -v apt-get &> /dev/null; then
+        sudo apt-get update && sudo apt-get install -y "$@"
+    elif command -v pacman &> /dev/null; then
+        sudo pacman -Sy --noconfirm "$@"
+    elif command -v dnf &> /dev/null; then
+        sudo dnf install -y "$@"
+    else
+        echo "❌ Unsupported package manager. Please install: $* manually."
+        exit 1
+    fi
+}
+
 # --- Self-Bootstrap Logic ---
 # If script is run directly (e.g. via curl), clone the full repo first.
 TARGET_DIR="$HOME/.dotfiles"
@@ -15,7 +29,7 @@ if [ "$(basename "$0")" == "bash" ] || [ ! -f "$TARGET_DIR/install.sh" ]; then
     
     # Ensure git is present for cloning
     if ! command -v git &> /dev/null; then
-        sudo apt-get update && sudo apt-get install -y git
+        install_packages git
     fi
 
     if [ ! -d "$TARGET_DIR" ]; then
@@ -46,7 +60,17 @@ echo "🦔 Setting up your Hedgehog Dotfiles..."
 
 # 1. Ensure core dependencies are installed
 echo "📦 Checking core dependencies..."
-sudo apt-get update && sudo apt-get install -y zsh fzf curl git unzip
+# Check for each command and build install list
+TO_INSTALL=()
+for cmd in zsh fzf curl git unzip; do
+    if ! command -v "$cmd" &> /dev/null; then
+        TO_INSTALL+=("$cmd")
+    fi
+done
+
+if [ ${#TO_INSTALL[@]} -ne 0 ]; then
+    install_packages "${TO_INSTALL[@]}"
+fi
 
 # 2. Oh My Zsh
 if [ ! -d "$DOTFILES_DIR/zsh/.oh-my-zsh" ]; then
