@@ -96,15 +96,26 @@ mkdir -p "$ZSH_CUSTOM/plugins"
 [ ! -d "$ZSH_CUSTOM/plugins/zsh-completions" ] && git clone https://github.com/zsh-users/zsh-completions "$ZSH_CUSTOM/plugins/zsh-completions"
 [ ! -d "$ZSH_CUSTOM/plugins/fzf-tab" ] && git clone https://github.com/Aloxaf/fzf-tab "$ZSH_CUSTOM/plugins/fzf-tab"
 
-# 5. Heavy Mode Tools (Optional)
+# 5. Programming Languages & Tools
+# Go Installation
+if ! command -v go &> /dev/null; then
+    echo "🐹 Installing Go..."
+    GO_VERSION="1.22.2"
+    curl -LO "https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz"
+    sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf "go${GO_VERSION}.linux-amd64.tar.gz"
+    rm "go${GO_VERSION}.linux-amd64.tar.gz"
+fi
+
+# Pyenv (Useful everywhere)
+if [ ! -d "$HOME/.pyenv" ]; then
+    echo "🐍 Installing Pyenv..."
+    curl https://pyenv.run | bash
+fi
+
+# 6. Heavy Mode Tools (Optional)
 LOCAL_RC="$DOTFILES_DIR/zsh/.zshrc.local"
 if [ "$HEAVY_MODE" = true ]; then
     echo "🐘 Heavy Mode: Installing additional tools..."
-    # Pyenv
-    if [ ! -d "$HOME/.pyenv" ]; then
-        echo "🐍 Installing Pyenv..."
-        curl https://pyenv.run | bash
-    fi
     # SDKMAN
     if [ ! -d "$HOME/.sdkman" ]; then
         echo "☕ Installing SDKMAN..."
@@ -113,7 +124,7 @@ if [ "$HEAVY_MODE" = true ]; then
     # Ensure heavy tools are NOT skipped
     echo "export DOTFILES_SKIP_HEAVY=false" > "$LOCAL_RC"
 else
-    echo "☁️ Server Mode: Skipping heavy dev tools..."
+    echo "☁️ Server Mode: Skipping SDKMAN and heavy init..."
     echo "export DOTFILES_SKIP_HEAVY=true" > "$LOCAL_RC"
 fi
 
