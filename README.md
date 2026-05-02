@@ -10,8 +10,15 @@ My personal Zsh configuration optimized for speed, cleanliness, and cross-platfo
 
 ## Installation
 
+### The Quick Way (One-liner)
+Just run this command on any fresh Debian/Ubuntu machine:
 ```bash
-git clone https://github.com/YOUR_USERNAME/dotfiles.git ~/.dotfiles
+curl -fsSL https://raw.githubusercontent.com/bropines/.dotfiles/main/install.sh | bash
+```
+
+### The Manual Way
+```bash
+git clone git@github.com:bropines/.dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
 ./install.sh
 ```
